@@ -5400,6 +5400,8 @@ export const Pokedex: import('../sim/dex-species').SpeciesDataTable = {
 		prevo: "Shroomish",
 		evoLevel: 23,
 		eggGroups: ["Fairy", "Grass"],
+		otherFormes: ["Breloom-Mega"],
+		formeOrder: ["Breloom", "Breloom-Mega"],
 	},
 	breloommega: {
 		num: 286,
