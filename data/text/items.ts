@@ -185,6 +185,10 @@ export const ItemsText: {[id: IDEntry]: ItemText} = {
 		name: "Bottle Cap",
 		shortDesc: "Used for Hyper Training. One of a Pokemon's stats is calculated with an IV of 31.",
 	},
+	breloomite: {
+		name: "Breloomite",
+		shortDesc: "If held by a Breloom, this item allows it to Mega Evolve in battle.",
+	},
 	brightpowder: {
 		name: "Bright Powder",
 		shortDesc: "The accuracy of attacks against the holder is 0.9x.",

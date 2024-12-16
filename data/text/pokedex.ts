@@ -1139,6 +1139,9 @@ export const PokedexText: {[id: IDEntry]: PokedexText} = {
 	breloom: {
 		name: "Breloom",
 	},
+	breloommega: {
+		name: "Breloom-Mega",
+	},
 	slakoth: {
 		name: "Slakoth",
 	},
