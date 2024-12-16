@@ -1867,6 +1867,11 @@ export const FormatsData: import('../sim/dex-species').SpeciesFormatsDataTable =
 		doublesTier: "(DUU)",
 		natDexTier: "RU",
 	},
+	breloommega: {
+		isNonstandard: "Past",
+		tier: "Illegal",
+		natDexTier: "UUBL",
+	},
 	slakoth: {
 		tier: "LC",
 	},

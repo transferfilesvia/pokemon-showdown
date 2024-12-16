@@ -644,6 +644,20 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		num: 795,
 		gen: 7,
 	},
+	breloomite: {
+		name: "Breloomite",
+		spritenum: 628,
+		megaStone: "Breloom-Mega",
+		megaEvolves: "Breloom",
+		itemUser: ["Breloom"],
+		onTakeItem(item, source) {
+			if (item.megaEvolves === source.baseSpecies.baseSpecies) return false;
+			return true;
+		},
+		num: 1000,
+		gen: 6,
+		isNonstandard: "Past",
+	},
 	brightpowder: {
 		name: "Bright Powder",
 		spritenum: 51,
