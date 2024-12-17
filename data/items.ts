@@ -411,7 +411,7 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 			if (item.megaEvolves === source.baseSpecies.baseSpecies) return false;
 			return true;
 		},
-		num: 770,
+		num: 659,
 		gen: 6,
 		isNonstandard: "Past",
 	},
@@ -656,7 +656,6 @@ export const Items: import('../sim/dex-items').ItemDataTable = {
 		},
 		num: 1000,
 		gen: 6,
-		isNonstandard: "Past",
 	},
 	brightpowder: {
 		name: "Bright Powder",
