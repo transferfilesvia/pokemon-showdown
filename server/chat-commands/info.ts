@@ -9,16 +9,16 @@
  * @license MIT
  */
 import * as net from 'net';
-import {YouTube, Twitch} from '../chat-plugins/youtube';
-import {Net, Utils} from '../../lib';
-import {RoomSections} from './room-settings';
+import { YouTube, Twitch } from '../chat-plugins/youtube';
+import { Net, Utils } from '../../lib';
+import { RoomSections } from './room-settings';
 
 const ONLINE_SYMBOL = ` \u25C9 `;
 const OFFLINE_SYMBOL = ` \u25CC `;
 
 interface DexResources {
 	url: string;
-	resources: {resource_name: string, url: string}[];
+	resources: { resource_name: string, url: string }[];
 }
 
 export function getCommonBattles(
@@ -46,7 +46,7 @@ export function findFormats(targetId: string, isOMSearch = false) {
 	const formatList = exactFormat.exists ? [exactFormat] : Dex.formats.all();
 
 	// Filter formats and group by section
-	const sections: {[k: string]: {name: string, formats: ID[]}} = {};
+	const sections: { [k: string]: { name: string, formats: ID[] } } = {};
 	let totalMatches = 0;
 	for (const format of formatList) {
 		const sectionId = toID(format.section);
@@ -65,11 +65,11 @@ export function findFormats(targetId: string, isOMSearch = false) {
 				}
 			}
 			totalMatches++;
-			if (!sections[sectionId]) sections[sectionId] = {name: format.section!, formats: []};
+			if (!sections[sectionId]) sections[sectionId] = { name: format.section!, formats: [] };
 			sections[sectionId].formats.push(format.id);
 		}
 	}
-	return {totalMatches, sections};
+	return { totalMatches, sections };
 }
 
 export const formatsDataCache = new Map<string, DexResources | null>();
@@ -106,7 +106,7 @@ export const commands: Chat.ChatCommands = {
 	profile: 'whois',
 	whois(target, room, user, connection, cmd) {
 		if (room?.roomid === 'staff' && !this.runBroadcast()) return;
-		const targetUser = this.getUserOrSelf(target, {exactName: user.tempGroup === ' '});
+		const targetUser = this.getUserOrSelf(target, { exactName: user.tempGroup === ' ' });
 		const showAll = (cmd === 'ip' || cmd === 'whoare' || cmd === 'alt' || cmd === 'alts' || cmd === 'altsnorecurse');
 		const showRecursiveAlts = showAll && (cmd !== 'altsnorecurse');
 		if (!targetUser) {
@@ -268,7 +268,7 @@ export const commands: Chat.ChatCommands = {
 				const punishments = Punishments.ips.get(ip);
 				if (user.can('alts') && punishments) {
 					for (const punishment of punishments) {
-						const {type, id} = punishment;
+						const { type, id } = punishment;
 						let punishMsg = Punishments.punishmentTypes.get(type)?.desc || type;
 						if (id !== targetUser.id) punishMsg += ` as ${id}`;
 						status.push(punishMsg);
@@ -316,17 +316,17 @@ export const commands: Chat.ChatCommands = {
 		}
 
 		if (canViewPunishments) {
-			const punishments = Punishments.getRoomPunishments(targetUser, {checkIps: true});
+			const punishments = Punishments.getRoomPunishments(targetUser, { checkIps: true });
 
 			if (punishments.length) {
 				buf += `<br />Room punishments: `;
 
 				buf += punishments.map(([curRoom, curPunishment]) => {
-					const {type: punishType, id: punishUserid, expireTime, reason} = curPunishment;
+					const { type: punishType, id: punishUserid, expireTime, reason } = curPunishment;
 					let punishDesc = Punishments.roomPunishmentTypes.get(punishType)?.desc || punishType;
 					if (punishUserid !== targetUser.id) punishDesc += ` as ${punishUserid}`;
 					const expiresIn = new Date(expireTime).getTime() - Date.now();
-					const expireString = Chat.toDurationString(expiresIn, {precision: 1});
+					const expireString = Chat.toDurationString(expiresIn, { precision: 1 });
 					punishDesc += ` for ${expireString}`;
 
 					if (reason) punishDesc += `: ${reason}`;
@@ -380,7 +380,7 @@ export const commands: Chat.ChatCommands = {
 		const idPunishments = Punishments.userids.get(userid);
 		if (idPunishments) {
 			for (const p of idPunishments) {
-				const {type: punishType, id: punishUserid, reason} = p;
+				const { type: punishType, id: punishUserid, reason } = p;
 				if (!user.can('alts') && !['LOCK', 'BAN'].includes(punishType)) continue;
 				const punishDesc = (Punishments.punishmentTypes.get(punishType)?.desc || punishType);
 				buf += `${punishDesc}: ${punishUserid}`;
@@ -399,17 +399,17 @@ export const commands: Chat.ChatCommands = {
 			}
 		}
 
-		const punishments = Punishments.getRoomPunishments(targetUser || {id: userid} as User);
+		const punishments = Punishments.getRoomPunishments(targetUser || { id: userid } as User);
 
 		if (punishments?.length) {
 			buf += `<br />Room punishments: `;
 
 			buf += punishments.map(([curRoom, curPunishment]) => {
-				const {type: punishType, id: punishUserid, expireTime, reason} = curPunishment;
+				const { type: punishType, id: punishUserid, expireTime, reason } = curPunishment;
 				let punishDesc = Punishments.roomPunishmentTypes.get(punishType)?.desc || punishType;
 				if (punishUserid !== userid) punishDesc += ` as ${punishUserid}`;
 				const expiresIn = new Date(expireTime).getTime() - Date.now();
-				const expireString = Chat.toDurationString(expiresIn, {precision: 1});
+				const expireString = Chat.toDurationString(expiresIn, { precision: 1 });
 				punishDesc += ` for ${expireString}`;
 
 				if (reason) punishDesc += `: ${reason}`;
@@ -471,7 +471,7 @@ export const commands: Chat.ChatCommands = {
 		this.checkCan('alts');
 		target = target.trim();
 		if (!net.isIPv4(target)) return this.errorReply('You must pass a valid IPv4 IP to /host.');
-		const {dnsbl, host, hostType} = await IPTools.lookup(target);
+		const { dnsbl, host, hostType } = await IPTools.lookup(target);
 		const dnsblMessage = dnsbl ? ` [${dnsbl}]` : ``;
 		this.sendReply(`IP ${target}: ${host || "ERROR"} [${hostType}]${dnsblMessage}`);
 	},
@@ -541,9 +541,9 @@ export const commands: Chat.ChatCommands = {
 			this.errorReply(`This command must be broadcast:`);
 			return this.parse(`/help checkchallenges`);
 		}
-		if (!target || !target.includes(',')) return this.parse(`/help checkchallenges`);
-		const {targetUser: user1, rest} = this.requireUser(target);
-		const {targetUser: user2, rest: rest2} = this.requireUser(rest);
+		if (!target?.includes(',')) return this.parse(`/help checkchallenges`);
+		const { targetUser: user1, rest } = this.requireUser(target);
+		const { targetUser: user2, rest: rest2 } = this.requireUser(rest);
 		if (user1 === user2 || rest2) return this.parse(`/help checkchallenges`);
 		if (!(user1.id in room.users) || !(user2.id in room.users)) {
 			return this.errorReply(`Both users must be in this room.`);
@@ -585,7 +585,7 @@ export const commands: Chat.ChatCommands = {
 		const gen = parseInt(cmd.substr(-1));
 		if (gen) target += `, gen${gen}`;
 
-		const {dex, format, targets} = this.splitFormat(target, true, true);
+		const { dex, format, targets } = this.splitFormat(target, true, true);
 
 		let buffer = '';
 		target = targets.join(',');
@@ -602,7 +602,7 @@ export const commands: Chat.ChatCommands = {
 		}
 		const newTargets = dex.dataSearch(target);
 		const showDetails = (cmd.startsWith('dt') || cmd === 'details');
-		if (!newTargets || !newTargets.length) {
+		if (!newTargets?.length) {
 			return this.errorReply(`No Pok\u00e9mon, item, move, ability or nature named '${target}' was found${Dex.gen > dex.gen ? ` in Gen ${dex.gen}` : ""}. (Check your spelling?)`);
 		}
 
@@ -610,7 +610,7 @@ export const commands: Chat.ChatCommands = {
 			if (newTarget.isInexact && !i) {
 				buffer = `No Pok\u00e9mon, item, move, ability or nature named '${target}' was found${Dex.gen > dex.gen ? ` in Gen ${dex.gen}` : ""}. Showing the data of '${newTargets[0].name}' instead.\n`;
 			}
-			let details: {[k: string]: string} = {};
+			let details: { [k: string]: string } = {};
 			switch (newTarget.searchType) {
 			case 'nature':
 				const nature = Dex.natures.get(newTarget.name);
@@ -624,7 +624,7 @@ export const commands: Chat.ChatCommands = {
 			case 'pokemon':
 				let pokemon = dex.species.get(newTarget.name);
 				if (format?.onModifySpecies) {
-					pokemon = format.onModifySpecies.call({dex, clampIntRange: Utils.clampIntRange, toID} as Battle, pokemon) || pokemon;
+					pokemon = format.onModifySpecies.call({ dex, clampIntRange: Utils.clampIntRange, toID } as Battle, pokemon) || pokemon;
 				}
 				let tierDisplay = room?.settings.dataCommandTierDisplay;
 				if (!tierDisplay && room?.battle) {
@@ -774,7 +774,7 @@ export const commands: Chat.ChatCommands = {
 						} else if (move.zMove?.basePower) {
 							details["Z-Power"] = String(move.zMove.basePower);
 						} else if (move.zMove?.effect) {
-							const zEffects: {[k: string]: string} = {
+							const zEffects: { [k: string]: string } = {
 								clearnegativeboost: "Restores negative stat stages to 0",
 								crit2: "Crit ratio +2",
 								heal: "Restores HP 100%",
@@ -786,7 +786,7 @@ export const commands: Chat.ChatCommands = {
 						} else if (move.zMove?.boost) {
 							details["Z-Effect"] = "";
 							const boost = move.zMove.boost;
-							const stats: {[k in BoostID]: string} = {
+							const stats: { [k in BoostID]: string } = {
 								atk: 'Attack', def: 'Defense', spa: 'Sp. Atk', spd: 'Sp. Def', spe: 'Speed', accuracy: 'Accuracy', evasion: 'Evasiveness',
 							};
 							let h: BoostID;
@@ -813,7 +813,7 @@ export const commands: Chat.ChatCommands = {
 						details["Dynamax Power"] = String(move.maxMove.basePower);
 					}
 
-					const targetTypes: {[k: string]: string} = {
+					const targetTypes: { [k: string]: string } = {
 						normal: "One Adjacent Pok\u00e9mon",
 						self: "User",
 						adjacentAlly: "One Ally",
@@ -902,7 +902,7 @@ export const commands: Chat.ChatCommands = {
 	weakness(target, room, user) {
 		if (!target) return this.parse('/help weakness');
 		if (!this.runBroadcast()) return;
-		const {format, dex, targets} = this.splitFormat(target.split(/[,/]/).map(toID));
+		const { format, dex, targets } = this.splitFormat(target.split(/[,/]/).map(toID));
 
 		let isInverse = false;
 		if (format && Dex.formats.getRuleTable(format).has('inversemod')) {
@@ -912,40 +912,94 @@ export const commands: Chat.ChatCommands = {
 			targets.pop();
 		}
 
-		let species: {types: string[], [k: string]: any} = dex.species.get(targets[0]);
-		const type1 = dex.types.get(targets[0]);
-		const type2 = dex.types.get(targets[1]);
-		const type3 = dex.types.get(targets[2]);
-
-		if (species.exists) {
-			target = species.name;
-		} else {
-			const types = [];
-			if (type1.exists) {
-				types.push(type1.name);
-				if (type2.exists && type2 !== type1) {
-					types.push(type2.name);
-				}
-				if (type3.exists && type3 !== type1 && type3 !== type2) {
-					types.push(type3.name);
-				}
+		const originalSearch = target;
+		let imperfectMatch = false;
+		let isMatch = false;
+		let species = dex.species.get(targets[0]);
+		let type1 = dex.types.get(targets[0]);
+		let type2 = dex.types.get(targets[1]);
+		let type3 = dex.types.get(targets[2]);
+		if (species.name !== "" && !species.exists && type1.name !== "" && !type1.exists) {
+			const typeSearchResults = dex.dataSearch(targets[0], ['TypeChart']);
+			const speciesSearchResults = dex.dataSearch(targets[0], ['Pokedex']);
+			if (typeSearchResults && typeSearchResults[0].name !== "") {
+				type1 = dex.types.get(typeSearchResults[0].name);
+				imperfectMatch = true;
+			} else if (speciesSearchResults && speciesSearchResults[0].name !== "") {
+				species = dex.species.get(speciesSearchResults[0].name);
+				imperfectMatch = true;
+			} else {
+				return this.sendReplyBox(Utils.html`${originalSearch} isn't a recognized type or Pokemon${Dex.gen > dex.gen ? ` in Gen ${dex.gen}` : ""}.`);
 			}
-
-			if (types.length === 0) {
-				return this.sendReplyBox(Utils.html`${target} isn't a recognized type or Pokemon${Dex.gen > dex.gen ? ` in Gen ${dex.gen}` : ""}.`);
-			}
-			species = {types: types};
-			target = types.join("/");
 		}
 
+		if (type2.name !== "" && !type2.exists) {
+			const searchResults = dex.dataSearch(targets[1], ['TypeChart']);
+			if (searchResults && searchResults[0].name !== "") {
+				type2 = dex.types.get(searchResults[0].name);
+				imperfectMatch = true;
+			} else {
+				return this.sendReplyBox(Utils.html`${originalSearch} isn't a recognized type or Pokemon${Dex.gen > dex.gen ? ` in Gen ${dex.gen}` : ""}.`);
+			}
+		}
+
+		if (type3.name !== "" && !type3.exists) {
+			const searchResults = dex.dataSearch(targets[2], ['TypeChart']);
+			if (searchResults && searchResults[0].name !== "") {
+				type3 = dex.types.get(searchResults[0].name);
+				imperfectMatch = true;
+			} else {
+				return this.sendReplyBox(Utils.html`${originalSearch} isn't a recognized type or Pokemon${Dex.gen > dex.gen ? ` in Gen ${dex.gen}` : ""}.`);
+			}
+		}
+
+		const types = [];
+		if (species.exists) {
+			for (const type of species.types) {
+				types.push(type);
+			}
+			target = species.name;
+			isMatch = true;
+		} else if (type1.exists) {
+			types.push(type1.name);
+			target = type1.name;
+			isMatch = true;
+		}
+
+		let alreadyFoundType2 = false;
+		let alreadyFoundType3 = false;
+		if (types.toString().toLowerCase().includes(type2.name.toLowerCase())) {
+			alreadyFoundType2 = true;
+		}
+		if (types.toString().toLowerCase().includes(type3.name.toLowerCase())) {
+			alreadyFoundType3 = true;
+		}
+
+		if (isMatch) {
+			const searchTarget = [];
+			searchTarget.push(target);
+			if (type2.exists && !alreadyFoundType2) {
+				types.push(type2.name);
+				searchTarget.push(type2.name);
+			}
+			if (type3.exists && !alreadyFoundType3) {
+				types.push(type3.name);
+				searchTarget.push(type3.name);
+			}
+			target = searchTarget.join("/");
+		}
+
+		if (imperfectMatch) {
+			this.sendReply(`No Pok\u00e9mon or type named '${originalSearch}' was found${Dex.gen > dex.gen ? ` in Gen ${dex.gen}` : ""}. Searching for '${target}' instead.`);
+		}
 		const weaknesses = [];
 		const resistances = [];
 		const immunities = [];
 		for (const type of dex.types.names()) {
-			const notImmune = dex.getImmunity(type, species);
+			const notImmune = dex.getImmunity(type, types);
 			if (notImmune || isInverse) {
 				let typeMod = !notImmune && isInverse ? 1 : 0;
-				typeMod += (isInverse ? -1 : 1) * dex.getEffectiveness(type, species);
+				typeMod += (isInverse ? -1 : 1) * dex.getEffectiveness(type, types);
 				switch (typeMod) {
 				case 1:
 					weaknesses.push(type);
@@ -971,7 +1025,7 @@ export const commands: Chat.ChatCommands = {
 			}
 		}
 
-		const statuses: {[k: string]: string} = {
+		const statuses: { [k: string]: string } = {
 			brn: "Burn",
 			frz: "Frozen",
 			hail: "Hail damage",
@@ -983,13 +1037,13 @@ export const commands: Chat.ChatCommands = {
 			trapped: "Trapping",
 		};
 		for (const status in statuses) {
-			if (!dex.getImmunity(status, species)) {
+			if (!dex.getImmunity(status, types)) {
 				immunities.push(statuses[status]);
 			}
 		}
 
 		const buffer = [];
-		buffer.push(`${species.exists ? `${species.name} (ignoring abilities):` : `${target}:`}`);
+		buffer.push(`${species.exists ? `${target} (ignoring abilities):` : `${target}:`}`);
 		buffer.push(`<span class="message-effect-weak">Weaknesses</span>: ${weaknesses.join(', ') || '<font color=#999999>None</font>'}`);
 		buffer.push(`<span class="message-effect-resist">Resistances</span>: ${resistances.join(', ') || '<font color=#999999>None</font>'}`);
 		buffer.push(`<span class="message-effect-immune">Immunities</span>: ${immunities.join(', ') || '<font color=#999999>None</font>'}`);
@@ -997,16 +1051,18 @@ export const commands: Chat.ChatCommands = {
 	},
 	weaknesshelp: [
 		`/weakness [pokemon] - Provides a Pok\u00e9mon's resistances, weaknesses, and immunities, ignoring abilities.`,
-		`/weakness [type 1]/[type 2] - Provides a type or type combination's resistances, weaknesses, and immunities, ignoring abilities.`,
-		`!weakness [pokemon] - Shows everyone a Pok\u00e9mon's resistances, weaknesses, and immunities, ignoring abilities. Requires: + % @ # ~`,
-		`!weakness [type 1]/[type 2] - Shows everyone a type or type combination's resistances, weaknesses, and immunities, ignoring abilities. Requires: + % @ # ~`,
+		`/weakness [type 1], [type 2] - Provides a type or type combination's resistances, weaknesses, and immunities, ignoring abilities.`,
+		`/weakness [pokemon], [type 1], [type 2] - Provides a Pok\u00e9mon's type and type combination's resistances, weaknesses, and immunities, ignoring abilities.`,
+		`!weakness [pokemon] - Shows everyone a Pok\u00e9mon's resistances, weaknesses, and immunities, ignoring abilities. Requires: + % @ # &`,
+		`!weakness [type 1], [type 2] - Shows everyone a type or type combination's resistances, weaknesses, and immunities, ignoring abilities. Requires: + % @ # &`,
+		`!weakness [pokemon], [type 1], [type 2] - Shows everyone a Pok\u00e9mon's type and type combination's resistances, weaknesses, and immunities, ignoring abilities. Requires: + % @ # &`,
 	],
 
 	eff: 'effectiveness',
 	type: 'effectiveness',
 	matchup: 'effectiveness',
 	effectiveness(target, room, user) {
-		const {dex, targets} = this.splitFormat(target.split(/[,/]/));
+		const { dex, targets } = this.splitFormat(target.split(/[,/]/));
 		if (targets.length !== 2) return this.errorReply("Attacker and defender must be separated with a comma.");
 
 		let searchMethods = ['types', 'moves', 'species'];
@@ -1042,7 +1098,7 @@ export const commands: Chat.ChatCommands = {
 					defender = foundData;
 					defName = `${foundData.name} (not counting abilities)`;
 				} else {
-					defender = {types: [foundData.name]};
+					defender = { types: [foundData.name] };
 					defName = foundData.name;
 				}
 				searchMethods = sourceMethods;
@@ -1058,11 +1114,11 @@ export const commands: Chat.ChatCommands = {
 			if (source.effectType !== 'Move' || source.category !== 'Status' && (source.basePower || source.basePowerCallback)) {
 				for (const type of defender.types) {
 					const baseMod = dex.getEffectiveness(source, type);
-					const moveMod = source.onEffectiveness?.call({dex: Dex} as Battle, baseMod, null, type, source);
+					const moveMod = source.onEffectiveness?.call({ dex: Dex } as Battle, baseMod, null, type, source);
 					totalTypeMod += typeof moveMod === 'number' ? moveMod : baseMod;
 				}
 			}
-			factor = Math.pow(2, totalTypeMod);
+			factor = 2 ** totalTypeMod;
 		}
 
 		const hasThousandArrows = source.id === 'thousandarrows' && defender.types.includes('Flying');
@@ -1080,10 +1136,10 @@ export const commands: Chat.ChatCommands = {
 		if (!this.runBroadcast()) return;
 		if (!target) return this.parse("/help coverage");
 
-		const {dex, targets} = this.splitFormat(target.split(/[,+/]/));
+		const { dex, targets } = this.splitFormat(target.split(/[,+/]/));
 		const sources: (string | Move)[] = [];
 		let dispTable = false;
-		const bestCoverage: {[k: string]: number} = {};
+		const bestCoverage: { [k: string]: number } = {};
 		let hasThousandArrows = false;
 
 		for (const type of dex.types.names()) {
@@ -1134,7 +1190,7 @@ export const commands: Chat.ChatCommands = {
 				} else {
 					if (!dex.getImmunity(move.type, type) && !move.ignoreImmunity) continue;
 					const baseMod = dex.getEffectiveness(move, type);
-					const moveMod = move.onEffectiveness?.call({dex} as Battle, baseMod, null, type, move as ActiveMove);
+					const moveMod = move.onEffectiveness?.call({ dex } as Battle, baseMod, null, type, move as ActiveMove);
 					eff = typeof moveMod === 'number' ? moveMod : baseMod;
 				}
 				if (eff > bestCoverage[type]) bestCoverage[type] = eff;
@@ -1149,7 +1205,7 @@ export const commands: Chat.ChatCommands = {
 				bestCoverage[type] = 0;
 				continue;
 			}
-			bestCoverage[type] = Math.pow(2, bestCoverage[type]);
+			bestCoverage[type] = 2 ** bestCoverage[type];
 		}
 
 		if (!dispTable) {
@@ -1178,7 +1234,7 @@ export const commands: Chat.ChatCommands = {
 			return this.sendReplyBox(buffer.join('<br />'));
 		} else {
 			let buffer = '<div class="scrollable"><table cellpadding="1" width="100%"><tr><th></th>';
-			const icon: {[k: string]: string} = {};
+			const icon: { [k: string]: string } = {};
 			for (const type of dex.types.names()) {
 				icon[type] = `<img src="https://${Config.routes.client}/sprites/types/${type}.png" width="32" height="14">`;
 				// row of icons at top
@@ -1213,10 +1269,10 @@ export const commands: Chat.ChatCommands = {
 									continue;
 								}
 								let baseMod = dex.getEffectiveness(move.type, type1);
-								let moveMod = move.onEffectiveness?.call({dex} as Battle, baseMod, null, type1, move as ActiveMove);
+								let moveMod = move.onEffectiveness?.call({ dex } as Battle, baseMod, null, type1, move as ActiveMove);
 								curEff += typeof moveMod === 'number' ? moveMod : baseMod;
 								baseMod = dex.getEffectiveness(move.type, type2);
-								moveMod = move.onEffectiveness?.call({dex} as Battle, baseMod, null, type2, move as ActiveMove);
+								moveMod = move.onEffectiveness?.call({ dex } as Battle, baseMod, null, type2, move as ActiveMove);
 								curEff += typeof moveMod === 'number' ? moveMod : baseMod;
 							}
 
@@ -1225,7 +1281,7 @@ export const commands: Chat.ChatCommands = {
 						if (bestEff === -5) {
 							bestEff = 0;
 						} else {
-							bestEff = Math.pow(2, bestEff);
+							bestEff = 2 ** bestEff;
 						}
 					}
 					if (bestEff === 0) {
@@ -1496,7 +1552,7 @@ export const commands: Chat.ChatCommands = {
 				if (ev < 0) iv += ev;
 				ev *= 4;
 				if (iv < 0 || ev > 255) {
-					return this.sendReplyBox('No valid EV/IV combination possible with given parameters. Maybe try a different nature?' + ev);
+					return this.sendReplyBox(`No valid EV/IV combination possible with given parameters. Maybe try a different nature?${ev}`);
 				}
 			} else {
 				return this.sendReplyBox('Too many parameters given; nothing to calculate.');
@@ -1536,13 +1592,13 @@ export const commands: Chat.ChatCommands = {
 		let uptimeText;
 		if (uptime > 24 * 60 * 60) {
 			const uptimeDays = Math.floor(uptime / (24 * 60 * 60));
-			uptimeText = uptimeDays + " " + (uptimeDays === 1 ? "day" : "days");
+			uptimeText = `${uptimeDays} ${uptimeDays === 1 ? "day" : "days"}`;
 			const uptimeHours = Math.floor(uptime / (60 * 60)) - uptimeDays * 24;
-			if (uptimeHours) uptimeText += ", " + uptimeHours + " " + (uptimeHours === 1 ? "hour" : "hours");
+			if (uptimeHours) uptimeText += `, ${uptimeHours} ${uptimeHours === 1 ? "hour" : "hours"}`;
 		} else {
 			uptimeText = Chat.toDurationString(uptime * 1000);
 		}
-		this.sendReplyBox("Uptime: <b>" + uptimeText + "</b>");
+		this.sendReplyBox(`Uptime: <b>${uptimeText}</b>`);
 	},
 	uptimehelp: [`/uptime - Shows how long the server has been online for.`],
 
@@ -1618,8 +1674,8 @@ export const commands: Chat.ChatCommands = {
 		const indefinitePunishments = [
 			this.tr`<strong>Indefinite global punishments</strong>:`,
 			this.tr`<strong>permalock</strong> - Issued for repeated instances of bad behavior and is rarely the result of a single action. ` +
-				this.tr`These can be appealed in the <a href="https://www.smogon.com/forums/threads/discipline-appeal-rules.3583479/">Discipline Appeal</a>` +
-				this.tr` forum after at least 3 months without incident.`,
+			this.tr`These can be appealed in the <a href="https://www.smogon.com/forums/threads/discipline-appeal-rules.3583479/">Discipline Appeal</a>` +
+			this.tr` forum after at least 3 months without incident.`,
 			this.tr`<strong>permaban</strong> - Unappealable global ban typically issued for the most severe cases of offensive/inappropriate behavior.`,
 		];
 
@@ -1770,7 +1826,7 @@ export const commands: Chat.ChatCommands = {
 			room.battle.format.endsWith('randomdoublesbattle')));
 		const isBattleSpotBattle = (room?.battle && (SUPPORTED_BATTLESPOT_FORMATS.includes(room.battle.format) ||
 			room.battle.format.includes("battlespotspecial")));
-		const {dex} = this.extractFormat(room?.battle?.format);
+		const { dex } = this.extractFormat(room?.battle?.format);
 
 		if (RANDOMS_CALC_COMMANDS.includes(cmd) ||
 			(isRandomBattle && !DEFAULT_CALC_COMMANDS.includes(cmd) && !BATTLESPOT_CALC_COMMANDS.includes(cmd))) {
@@ -1843,7 +1899,7 @@ export const commands: Chat.ChatCommands = {
 		let targetId = toID(target);
 		if (targetId === 'ladder') targetId = 'search' as ID;
 		if (targetId === 'all') targetId = '';
-		const {totalMatches, sections} = findFormats(targetId, isOMSearch);
+		const { totalMatches, sections } = findFormats(targetId, isOMSearch);
 
 		if (!totalMatches) return this.errorReply("No matched formats found.");
 
@@ -1877,7 +1933,7 @@ export const commands: Chat.ChatCommands = {
 			const descHtml: string[] = [];
 			const data = await getFormatResources(format.id);
 			if (data) {
-				for (const {resource_name, url} of data.resources) {
+				for (const { resource_name, url } of data.resources) {
 					let rn = resource_name;
 					rn = rn.replace(/ thread$/gi, '');
 					rn = rn.replace(/Pokemon Showdown/gi, 'PS');
@@ -1888,7 +1944,8 @@ export const commands: Chat.ChatCommands = {
 				descHtml.push(...format.threads);
 			} else {
 				const genID = ['rb', 'gs', 'rs', 'dp', 'bw', 'xy', 'sm', 'ss', 'sv'];
-				descHtml.push(`This format has no resources linked on its <a href="https://www.smogon.com/dex/${genID[format.gen - 1] || 'sv'}/formats/">Smogon Dex page</a>. ` +
+				const gen = Dex.forFormat(format).gen;
+				descHtml.push(`This format has no resources linked on its <a href="https://www.smogon.com/dex/${genID[gen - 1] || 'sv'}/formats/">Smogon Dex page</a>. ` +
 					`Please contact a <a href="https://www.smogon.com/forums/forums/757/">C&amp;C Leader</a> to resolve this. ` +
 					`Alternatively, if this format can't have a page on the Smogon Dex, message <username>dhelmise</username>.<br />`);
 			}
@@ -1911,7 +1968,7 @@ export const commands: Chat.ChatCommands = {
 				const desc = subformat.desc ? [subformat.desc] : [];
 				const data = await getFormatResources(subformat.id);
 				if (data) {
-					for (const {resource_name, url} of data.resources) {
+					for (const { resource_name, url } of data.resources) {
 						desc.push(`&bullet; <a href="${url}">${resource_name}</a>`);
 					}
 				}
@@ -2016,7 +2073,7 @@ export const commands: Chat.ChatCommands = {
 			return this.errorReply(`This is not a room you can set the rules of.`);
 		}
 		const possibleRoom = Rooms.search(toID(target));
-		const {totalMatches: formatMatches} = findFormats(toID(target));
+		const { totalMatches: formatMatches } = findFormats(toID(target));
 		if (formatMatches && possibleRoom && cmd !== 'roomrules') {
 			this.errorReply(`'${target}' is both a room and a tier. `);
 			this.errorReply(`If you were looking for rules of that room, use /roomrules [room].`);
@@ -2084,8 +2141,8 @@ export const commands: Chat.ChatCommands = {
 		if (showAll || target === 'tiering' || target === 'tiers' || target === 'tier') {
 			buffer.push(`<a href="https://www.smogon.com/ingame/battle/tiering-faq">${this.tr`Tiering FAQ`}</a>`);
 		}
-		if (showAll || target === 'badge' || target === 'badges') {
-			buffer.push(`<a href="https://www.smogon.com/badge_faq">${this.tr`Badge FAQ`}</a>`);
+		if (showAll || ['badge', 'badges', 'badgeholders'].includes(target)) {
+			buffer.push(`<a href="https://www.smogon.com/forums/threads/60351/">${this.tr`Badge FAQ`}</a>`);
 		}
 		if (showAll || target === 'rng') {
 			buffer.push(`<a href="https://${Config.routes.root}/${this.tr`pages/rng`}">${this.tr`Common misconceptions about our RNG`}</a>`);
@@ -2103,7 +2160,7 @@ export const commands: Chat.ChatCommands = {
 			buffer.push(`<a href="https://pokemonshowdown.com/${this.tr`pages/privacy`}">${this.tr`Pokémon Showdown privacy policy`}</a>`);
 		}
 		if (showAll || ['lostpassword', 'password', 'lostpass'].includes(target)) {
-			buffer.push(`If you need your Pokémon Showdown password reset, you can fill out a <a href="https://www.smogon.com/forums/password-reset-form/">${this.tr`Password Reset Form`}</a>. <b>You will need to make a Smogon account to be able to fill out a form</b>; that's what the email address you sign in to Smogon with is for (PS accounts for regular users don't have emails associated with them).`);
+			buffer.push(`Until an email server for Pokemon Showdown is set up, <b>it is no longer possible to reset the password for your account</b>`);
 		}
 		if (!buffer.length && target) {
 			this.errorReply(`'${target}' is an invalid FAQ.`);
@@ -2207,7 +2264,7 @@ export const commands: Chat.ChatCommands = {
 			} else if (extraFormat.effectType !== 'Format') {
 				formatName = formatId = '';
 			}
-			const supportedLanguages: {[k: string]: string} = {
+			const supportedLanguages: { [k: string]: string } = {
 				spanish: 'es',
 				french: 'fr',
 				italian: 'it',
@@ -2443,7 +2500,7 @@ export const commands: Chat.ChatCommands = {
 		let maxRoll = 0;
 		let minRoll = Number.MAX_SAFE_INTEGER;
 
-		const trackRolls = diceQuantity * (('' + diceFaces).length + 1) <= 60;
+		const trackRolls = diceQuantity * (`${diceFaces}`.length + 1) <= 60;
 		const rolls = [];
 		let rollSum = 0;
 
@@ -2488,7 +2545,7 @@ export const commands: Chat.ChatCommands = {
 	pr: 'pickrandom',
 	pick: 'pickrandom',
 	pickrandom(target, room, user) {
-		if (!target || !target.includes(',')) return this.parse('/help pick');
+		if (!target?.includes(',')) return this.parse('/help pick');
 		if (!this.runBroadcast(true)) return false;
 		if (this.broadcasting) {
 			[, target] = Utils.splitFirst(this.message, ' ');
@@ -2544,9 +2601,9 @@ export const commands: Chat.ChatCommands = {
 		if (!room.pendingApprovals) room.pendingApprovals = new Map();
 		room.pendingApprovals.set(user.id, {
 			name: user.name,
-			link: link,
-			comment: comment,
-			dimensions: dimensions,
+			link,
+			comment,
+			dimensions,
 		});
 		this.sendReply(`You have requested to show the link: ${link}${comment ? ` (with the comment ${comment})` : ''}.`);
 		const message = `|tempnotify|pendingapprovals|Pending media request!` +
@@ -2708,7 +2765,7 @@ export const commands: Chat.ChatCommands = {
 		}
 		room = this.requireRoom();
 		room.lastBroadcast = '';
-		this.parse(target, {broadcastPrefix: "!rebroadcast "});
+		this.parse(target, { broadcastPrefix: "!rebroadcast " });
 	},
 	rebroadcasthelp: [
 		`!rebroadcast ![command] - Bypasses the broadcast cooldown to broadcast a command.`,
@@ -2738,7 +2795,7 @@ export const commands: Chat.ChatCommands = {
 		// hardcode, since the loginserver doesn't store exact times, and
 		// so this can look quite inaccurate if it was within the last day
 		const regTimeAgo = duration > 24 * 60 * 60 * 1000 ?
-			Chat.toDurationString(duration, {precision: 1}) :
+			Chat.toDurationString(duration, { precision: 1 }) :
 			'less than a day';
 		this.sendReplyBox(Utils.html`The user '${target}' registered ${regTimeAgo} ago, on the date ${date.toDateString()}.`);
 	},
@@ -2758,7 +2815,7 @@ export const commands: Chat.ChatCommands = {
 	code(target, room, user, connection) {
 		// target is trimmed by Chat#splitMessage, but leading spaces can be
 		// important to code block indentation.
-		target = this.message.substr(this.cmdToken.length + this.cmd.length + +this.message.includes(' ')).trimRight();
+		target = this.message.substr(this.cmdToken.length + this.cmd.length + (this.message.includes(' ') ? 1 : 0)).trimRight();
 		if (!target) return this.parse('/help code');
 		if (target.length >= 8192) return this.errorReply("Your code must be under 8192 characters long!");
 		if (target.length < 80 && !target.includes('\n') && !target.includes('```') && this.shouldBroadcast()) {
@@ -3265,7 +3322,7 @@ export const pages: Chat.PageTable = {
 		return buf;
 	},
 	approvals(args) {
-		const room = Rooms.get(args[0]) as ChatRoom | GameRoom;
+		const room = Rooms.get(args[0])!;
 		this.checkCan('mute', null, room);
 		if (!room.pendingApprovals) room.pendingApprovals = new Map();
 		if (room.pendingApprovals.size < 1) return `<h2>No pending approvals on ${room.title}</h2>`;
