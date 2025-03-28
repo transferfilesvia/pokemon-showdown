@@ -2484,11 +2484,20 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		pp: 10,
 		priority: 0,
 		flags: {},
-		// TODO show prepare message before the "POKEMON used MOVE!" message
-		// This happens even before sleep shows its "POKEMON is fast asleep." message
+		priorityChargeCallback(source) {
+			source.addVolatile('chillyreception');
+		},
 		weather: 'snowscape',
 		selfSwitch: true,
 		secondary: null,
+		condition: {
+			duration: 1,
+			onBeforeMovePriority: 100,
+			onBeforeMove(source, target, move) {
+				if (move.id !== 'chillyreception') return;
+				this.add('-prepare', source, 'Chilly Reception', '[premajor]');
+			},
+		},
 		target: "all",
 		type: "Ice",
 	},
@@ -8624,7 +8633,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			},
 			onTryHeal(damage, target, source, effect) {
 				if (effect && (effect.id === 'zpower' || (effect as Move).isZ)) return damage;
-				if (source && target !== source && target.hp !== target.maxhp) {
+				if (source && target !== source && target.hp !== target.maxhp && effect.name === "Pollen Puff") {
 					this.attrLastMove('[still]');
 					// FIXME: Wrong error message, correct one not supported yet
 					this.add('cant', source, 'move: Heal Block', effect);
